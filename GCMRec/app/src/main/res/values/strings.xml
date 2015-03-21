@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GCMRec</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="sharedPrefsNameString">trackMeData</string>
+    <string name="track_me_text">Track Me</string>
+    <string name="broadcast_button_text">Broadcast</string>
+    <string name="unbroadcast_button_text">STOP BROADCAST</string>
+
+    <array name="mode_label">
+        <item name="active">Active</item>
+        <item name="active">Passive</item>
+    </array>
+
+</resources>
