@@ -70,6 +70,11 @@ public class ActiveFragment extends Fragment {
             for (NumberPicker s : key) {
                 temp = temp * 10 + s.getValue();
             }
+            
+            //disable the NumericPicker
+            for (NumberPicker s : key) {
+                s.setEnabled(false);
+            }
 
             Log.i(LOG_TAG, "unique key of the user is : " + temp);
 
@@ -78,6 +83,11 @@ public class ActiveFragment extends Fragment {
         } else {
             bc.setText(getResources().getString(R.string.broadcast_button_text));
             //stop broadcast
+            
+            //enable the NumericPicker
+            for (NumberPicker s : key) {
+                s.setEnabled(true);
+            }
         }
 
         //send data to app server
