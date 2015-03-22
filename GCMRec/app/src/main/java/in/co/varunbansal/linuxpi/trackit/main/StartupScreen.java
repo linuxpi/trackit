@@ -118,6 +118,7 @@ public class StartupScreen extends FragmentActivity{
                     case PASSIVE:
 
                         //alert dialog
+
                         tabView.setCurrentItem(ACTIVE);// change tab back to active
 
                         //transition from active to passive
