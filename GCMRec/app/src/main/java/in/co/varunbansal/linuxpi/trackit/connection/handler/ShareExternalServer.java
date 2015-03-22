@@ -51,7 +51,7 @@ public class ShareExternalServer extends AsyncTask implements GoogleApiClient.Co
         paramsMap.put("regId", regId);
         paramsMap.put("unKey", uniqueKey);
 
-        if(uniqueKey!=0) {
+        if(uniqueKey!=0 || uniqueKey!=100000) {
             buildGoogleAPIClient();
 
             mGoogleApiClient.connect();

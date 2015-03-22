@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import in.co.varunbansal.linuxpi.trackit.adapter.MyPagerAdapter;
 import in.co.varunbansal.linuxpi.trackit.adapter.OnPageChangeAdapter;
@@ -43,7 +44,7 @@ public class StartupScreen extends FragmentActivity{
     private BroadcastReceiver OnActiveUserListUpdateReceived = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<Integer> activeUsers = intent.getIntegerArrayListExtra(ACTIVE_USERS_ARRAY_LIST);
+            ArrayList<String> activeUsers = intent.getStringArrayListExtra(ACTIVE_USERS_ARRAY_LIST);
             String unKey;
 
             if(passiveFragment==null)
@@ -53,9 +54,9 @@ public class StartupScreen extends FragmentActivity{
                 unKey=intent.getStringExtra(UN_KEY);
                 Log.i(LOG_TAG, "data recieved : " + unKey);
                 if(unKey.charAt(0)=='-'){
-                    passiveFragment.removeActiveUser(unKey);
+                    passiveFragment.removeActiveUser(unKey.substring(1));
                 }else {
-                    passiveFragment.addNewActiveUser(unKey);
+                    passiveFragment.addNewActiveUser(unKey.substring(1));
                 }
             }else{
                 Log.i(LOG_TAG, "data recieved : " + activeUsers.toString());
@@ -117,8 +118,8 @@ public class StartupScreen extends FragmentActivity{
                         break;
                     case PASSIVE:
 
-                        //alert dialog
-                        tabView.setCurrentItem(ACTIVE);// change tab back to active
+//                        //alert dialog
+//                        tabView.setCurrentItem(ACTIVE);// change tab back to active
 
                         //transition from active to passive
                         MODE=false;
