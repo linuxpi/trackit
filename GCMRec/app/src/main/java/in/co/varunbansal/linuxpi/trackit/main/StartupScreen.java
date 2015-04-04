@@ -78,6 +78,8 @@ public class StartupScreen extends FragmentActivity{
         LocalBroadcastManager.getInstance(this)
                      .registerReceiver(OnActiveUserListUpdateReceived, new IntentFilter(ACTIVE_USERS_LIST_UPDATE_INTENT_TAG));
 
+
+
         activeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,6 +117,8 @@ public class StartupScreen extends FragmentActivity{
                         }
 
 
+
+
                         break;
                     case PASSIVE:
 
@@ -123,8 +127,10 @@ public class StartupScreen extends FragmentActivity{
 
                         //transition from active to passive
                         MODE=false;
-                        if(activeFragment!=null) {
+                        if(activeFragment==null) {
                             activeFragment = (ActiveFragment) getSupportFragmentManager().findFragmentByTag(ActiveFragment.FRAGMENT_TAG);
+                        }
+                        if(activeFragment!=null) {
                             activeFragment.stopBroadcast();
                         }
                         //ask the server for a list of active users
@@ -154,6 +160,24 @@ public class StartupScreen extends FragmentActivity{
                     actionBar.newTab()
                             .setText(getResources().getStringArray(R.array.mode_label)[i])
                             .setTabListener(tabListener));
+        }
+
+
+        if(getIntent().getBooleanExtra("NotificationMode",false)){
+
+            String un=null;
+            un = getIntent().getStringExtra("UniqueKey");
+            Log.i(LOG_TAG,un);
+            setUpInitialLayout(ACTIVE);
+            tabView.setCurrentItem(ACTIVE);
+            if(activeFragment==null)
+                activeFragment=(ActiveFragment) adapter.getItem(0);
+
+            if(activeFragment!=null){
+                activeFragment.setUniqueKey(un);
+            }
+
+
         }
 
     }
@@ -200,6 +224,44 @@ public class StartupScreen extends FragmentActivity{
         tabView.setVisibility(View.VISIBLE);
 
     }
+
+    @Override
+    protected void onStop() {
+        Log.i(LOG_TAG,"onstop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.i(LOG_TAG,"onpause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i(LOG_TAG,"ondestroy");
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i(LOG_TAG,"onresume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.i(LOG_TAG,"onrestart");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.i(LOG_TAG,"onstart");
+        super.onStart();
+    }
+
+
 }
 
 

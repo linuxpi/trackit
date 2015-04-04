@@ -7,6 +7,7 @@ public interface Config {
 
     // GCM server using java
     static final String APP_SERVER_URL ="http://varun.varunbansal.co.in/com.lpu.android.trackme/AppServer?shareRegId=1";
+    static final String APP_SERVER_URL_LOC ="http://varun.varunbansal.co.in/com.lpu.android.trackme/AppServer?shareRegId=2";
 //    static final String APP_SERVER_URL ="http://localhost:8080/com.lpu.android.trackme/AppServer?shareRegId=1";
 
     // Google Project Number

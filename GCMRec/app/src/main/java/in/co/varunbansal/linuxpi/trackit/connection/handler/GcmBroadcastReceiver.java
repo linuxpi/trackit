@@ -3,12 +3,18 @@ package in.co.varunbansal.linuxpi.trackit.connection.handler;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
+import android.widget.Toast;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import in.co.varunbansal.linuxpi.trackit.helper.Config;
 import in.co.varunbansal.linuxpi.trackit.main.StartupScreen;
@@ -17,35 +23,53 @@ import static in.co.varunbansal.linuxpi.trackit.helper.StaticConstants.*;
 
 public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
 
+    private double latFromString;
+    private double lonFromString;
+
     @Override
     public void onReceive(Context context, Intent intent) {
         //if the device is in passive mode then parse the data from server
         Log.i(LOG_TAG, "Received Notification from server");
         if (!StartupScreen.MODE) {
-//            ComponentName comp = new ComponentName(context.getPackageName(),
-//                    GCMNotificationIntentService.class.getName());
-//            startWakefulService(context, (intent.setComponent(comp)));
             Bundle extras = intent.getExtras();
-//            if(extras!=null) {
-                String data = extras.get(Config.MESSAGE_KEY).toString();
-                //parse the data first
-                Log.i(LOG_TAG, "Received raw data  : " + data + "(" + data.length() + ")");
+            String data = extras.get(Config.MESSAGE_KEY).toString();
+            //parse the data first
+            Log.i(LOG_TAG, "Received raw data  : " + data + "(" + data.length() + ")");
+            if (data.charAt(0) != 'g') {
                 ArrayList<String> tempData = null;
-                String unKey=null;
+                String unKey = null;
 
-            Intent i = new Intent(ACTIVE_USERS_LIST_UPDATE_INTENT_TAG);
+                Intent i = new Intent(ACTIVE_USERS_LIST_UPDATE_INTENT_TAG);
 
-                if(data.charAt(0)=='['){
+                if (data.charAt(0) == '[') {
                     tempData = parseDataStringToArrayList(data);
                     i.putStringArrayListExtra(ACTIVE_USERS_ARRAY_LIST, tempData);
-                }else{
-                    unKey=data;
-                    i.putExtra("unKey",unKey);
+                } else {
+                    unKey = data;
+                    i.putExtra("unKey", unKey);
                 }
-                   LocalBroadcastManager.getInstance(context).sendBroadcast(i);
-                setResultCode(Activity.RESULT_OK);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+            } else if (data.charAt(0) == 'g') {
+                Log.i(LOG_TAG, "Received location data");
+//                Toast.makeText(context, "Location data :: " + data, Toast.LENGTH_Short).show();
+                List<Address> add;
+
+                double lat = getLatFromString(data);
+                double lon = getLonFromString(data);
+
+                Geocoder geocoder = new Geocoder(context);
+                try {
+                    add = geocoder.getFromLocation(lat, lon, 1);
+                    Address locationAdd = add.get(0);
+
+                    Toast.makeText(context,"Locality :: "+locationAdd.getAddressLine(0),Toast.LENGTH_LONG).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
-//        }
+            setResultCode(Activity.RESULT_OK);
+        }
     }
 
     private ArrayList<String> parseDataStringToArrayList(String data) {
@@ -76,5 +100,13 @@ public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
             return tempData;
         }
         return null;
+    }
+
+    public double getLatFromString(String data) {
+        return Double.parseDouble(data.substring(data.indexOf('|')+1));
+    }
+
+    public double getLonFromString(String data) {
+        return Double.parseDouble(data.substring(3,data.indexOf('|')-1));
     }
 }

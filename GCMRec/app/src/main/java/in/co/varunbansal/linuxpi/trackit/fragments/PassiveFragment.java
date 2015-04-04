@@ -8,12 +8,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
 import in.co.varunbansal.linuxpi.trackit.R;
+import in.co.varunbansal.linuxpi.trackit.connection.handler.RequestLocationData;
+import in.co.varunbansal.linuxpi.trackit.main.FirstLaunch;
 
 import static in.co.varunbansal.linuxpi.trackit.helper.StaticConstants.*;
 
@@ -39,6 +42,21 @@ public class PassiveFragment extends Fragment {
         activeUsersList.setAdapter(adapter);
 
         FRAGMENT_TAG = getTag();
+
+        activeUsersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String data = adapter.getItem(position);
+                String unKey = data.substring(0,data.length()-2);
+                String serial = data.substring(data.length() - 1);
+                Log.i(LOG_TAG,"CLicked :: " + unKey);
+                Log.i(LOG_TAG,"CLicked :: " + serial);
+
+                //send the request to server to fetch the location
+                RequestLocationData req = new RequestLocationData(getActivity(),serial,unKey,FirstLaunch.reg_id);
+                req.execute(null,null,null);
+            }
+        });
 
         return myView;
     }

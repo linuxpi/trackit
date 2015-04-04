@@ -50,6 +50,8 @@ public class AppServer extends HttpServlet {
 		 unKey = request.getParameter("unKey");
 		 locString = request.getParameter("locString");
 		 serial = request.getParameter("serial");
+		 
+		 System.out.println("Unique key :: " + unKey);
 		
 		initializeDatabaseParams();
 
@@ -95,13 +97,69 @@ public class AppServer extends HttpServlet {
 				}
 				
 			}
+		}else if((share != null && !share.isEmpty())
+				&& (unKey != null && !unKey.isEmpty()) && (serial != null && !serial.isEmpty()) &&(regId != null && !regId.isEmpty())  && (share.equals("2"))){
+			System.out.println("Request received for location");
+			String loc = getLocationFromSerial(serial);
+			
+			//send location data to user
+			sendLocationToSingleUser(regId,loc);
 		}
+		
+	}
+
+	private void sendLocationToSingleUser(String regId2, String loc) {
+		// TODO Auto-generated method stub
+		
+		Result result = null;
+		
+		Sender sender = new Sender(GOOGLE_SERVER_KEY);
+		Message message=null;
+		message = new Message.Builder().timeToLive(30)
+				.delayWhileIdle(true).addData(MESSAGE_KEY, "geo"+loc)
+				.build();
+		System.out.println(message.toString());
+		
+		try {
+			result = sender.send(message, regId2, 1);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+
+	private String getLocationFromSerial(String serial2) {
+		// TODO Auto-generated method stub
+		
+		System.out.println("SELECT location FROM users WHERE serial_num="+serial2);
+		
+		String query = "SELECT location FROM users WHERE serial_num="+serial2;
+		String loc;
+		try {
+			ResultSet rs = st.executeQuery(query);
+			if(rs.next()){
+				loc = rs.getString(1);
+				if(loc.equals("null") || loc.isEmpty()){
+					return null;
+				}
+				else{
+					return loc;
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
 		
 	}
 
 	private String addNewUserToDatabase(String regId2,String unKey2) {
 		// TODO Auto-generated method stub
-		String query = "INSERT INTO users (unKey,regId,location) VALUES ("+unKey2+",'"+regId2+"','"+locString+"');";
+		String query = "INSERT INTO users (unKey,regId,location) VALUES ('"+unKey2+"','"+regId2+"','"+locString+"');";
 		int result=0;
 		try {
 			result = st.executeUpdate(query);
@@ -254,7 +312,7 @@ public class AppServer extends HttpServlet {
 			ArrayList<String> activeUserList = new ArrayList<String>();
 			
 			while(rsActiveUsers.next()){
-				activeUserList.add(Integer.toString(rsActiveUsers.getInt(1))+"|"+rsActiveUsers.getInt(2));
+				activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(1));
 			}
 			
 			if(activeUserList.size()>0){
@@ -351,7 +409,7 @@ public class AppServer extends HttpServlet {
 
 	private boolean updateUnKeyWithLocation(String serial2, String unKey2,String locString2) {
 		// TODO Auto-generated method stub
-		String query = "UPDATE users SET unKey="+unKey2+",location='"+locString2+"' WHERE serial_num="+serial2+";";
+		String query = "UPDATE users SET unKey='"+unKey2+"',location='"+locString2+"' WHERE serial_num="+serial2+";";
 		int result = 0;
 		try {
 			result = st.executeUpdate(query);
@@ -393,7 +451,7 @@ public class AppServer extends HttpServlet {
 		try {
 			ResultSet rs = st.executeQuery(query);
 			if(rs.next()){
-				return Integer.toString(rs.getInt(1));
+				return rs.getString(1);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
