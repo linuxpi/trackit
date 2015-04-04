@@ -10,11 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
 import in.co.varunbansal.linuxpi.trackit.R;
+import in.co.varunbansal.linuxpi.trackit.adapter.ActiveUserListAdapter;
 import in.co.varunbansal.linuxpi.trackit.connection.handler.RequestLocationData;
 import in.co.varunbansal.linuxpi.trackit.main.FirstLaunch;
 
@@ -36,27 +38,39 @@ public class PassiveFragment extends Fragment {
         View myView = inflater.inflate(R.layout.passive_layout, container, false);
 
         activeUsers = new ArrayList<>();
-        adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, activeUsers);
+        adapter = new ActiveUserListAdapter(getActivity(), R.layout.active_user_list_item,R.id.textview_active_user, activeUsers);
 
         activeUsersList = (ListView) myView.findViewById(R.id.active_user_list);
         activeUsersList.setAdapter(adapter);
-
-        FRAGMENT_TAG = getTag();
-
         activeUsersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String data = adapter.getItem(position);
-                String unKey = data.substring(0,data.length()-2);
-                String serial = data.substring(data.length() - 1);
-                Log.i(LOG_TAG,"CLicked :: " + unKey);
-                Log.i(LOG_TAG,"CLicked :: " + serial);
-
-                //send the request to server to fetch the location
-                RequestLocationData req = new RequestLocationData(getActivity(),serial,unKey,FirstLaunch.reg_id);
-                req.execute(null,null,null);
+                LinearLayout ll = (LinearLayout) view.findViewById(R.id.location_group);
+                if(ll.getVisibility()==View.VISIBLE){
+                    ll.setVisibility(View.GONE);
+                }
+                else{
+                    ll.setVisibility(View.VISIBLE);
+                }
             }
         });
+
+        FRAGMENT_TAG = getTag();
+
+//        activeUsersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                String data = adapter.getItem(position);
+//                String unKey = data.substring(0,data.length()-2);
+//                String serial = data.substring(data.length() - 1);
+//                Log.i(LOG_TAG,"CLicked :: " + unKey);
+//                Log.i(LOG_TAG,"CLicked :: " + serial);
+//
+//                //send the request to server to fetch the location
+//                RequestLocationData req = new RequestLocationData(getActivity(),serial,unKey,FirstLaunch.reg_id);
+//                req.execute(null,null,null);
+//            }
+//        });
 
         return myView;
     }
