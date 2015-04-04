@@ -141,18 +141,10 @@ public class ActiveFragment extends Fragment {
             temp.append("00000");
             //enable the NumericPicker
             enableNumbericKey();
-<<<<<<< HEAD
 
-            //cancel the notification
-+           NotificationManager manager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-+           manager.cancel(NOTIFICATION_ID);      
-=======
-            
             //cancel the notification
             NotificationManager manager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-            manager.cancel(NOTIFICATION_ID); 
-
->>>>>>> origin/patch-1
+            manager.cancel(NOTIFICATION_ID);
         }
 
         //send data to app server
