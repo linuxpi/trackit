@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import in.co.varunbansal.linuxpi.trackit.adapter.MyPagerAdapter;
 import in.co.varunbansal.linuxpi.trackit.adapter.OnPageChangeAdapter;
@@ -43,7 +44,7 @@ public class StartupScreen extends FragmentActivity{
     private BroadcastReceiver OnActiveUserListUpdateReceived = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<Integer> activeUsers = intent.getIntegerArrayListExtra(ACTIVE_USERS_ARRAY_LIST);
+            ArrayList<String> activeUsers = intent.getStringArrayListExtra(ACTIVE_USERS_ARRAY_LIST);
             String unKey;
 
             if(passiveFragment==null)
@@ -53,9 +54,9 @@ public class StartupScreen extends FragmentActivity{
                 unKey=intent.getStringExtra(UN_KEY);
                 Log.i(LOG_TAG, "data recieved : " + unKey);
                 if(unKey.charAt(0)=='-'){
-                    passiveFragment.removeActiveUser(unKey);
+                    passiveFragment.removeActiveUser(unKey.substring(1));
                 }else {
-                    passiveFragment.addNewActiveUser(unKey);
+                    passiveFragment.addNewActiveUser(unKey.substring(1));
                 }
             }else{
                 Log.i(LOG_TAG, "data recieved : " + activeUsers.toString());
@@ -76,6 +77,8 @@ public class StartupScreen extends FragmentActivity{
 
         LocalBroadcastManager.getInstance(this)
                      .registerReceiver(OnActiveUserListUpdateReceived, new IntentFilter(ACTIVE_USERS_LIST_UPDATE_INTENT_TAG));
+
+
 
         activeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,17 +117,20 @@ public class StartupScreen extends FragmentActivity{
                         }
 
 
+
+
                         break;
                     case PASSIVE:
 
-                        //alert dialog
-
-                        tabView.setCurrentItem(ACTIVE);// change tab back to active
+//                        //alert dialog
+//                        tabView.setCurrentItem(ACTIVE);// change tab back to active
 
                         //transition from active to passive
                         MODE=false;
-                        if(activeFragment!=null) {
+                        if(activeFragment==null) {
                             activeFragment = (ActiveFragment) getSupportFragmentManager().findFragmentByTag(ActiveFragment.FRAGMENT_TAG);
+                        }
+                        if(activeFragment!=null) {
                             activeFragment.stopBroadcast();
                         }
                         //ask the server for a list of active users
@@ -154,6 +160,24 @@ public class StartupScreen extends FragmentActivity{
                     actionBar.newTab()
                             .setText(getResources().getStringArray(R.array.mode_label)[i])
                             .setTabListener(tabListener));
+        }
+
+
+        if(getIntent().getBooleanExtra("NotificationMode",false)){
+
+            String un=null;
+            un = getIntent().getStringExtra("UniqueKey");
+            Log.i(LOG_TAG,un);
+            setUpInitialLayout(ACTIVE);
+            tabView.setCurrentItem(ACTIVE);
+            if(activeFragment==null)
+                activeFragment=(ActiveFragment) adapter.getItem(0);
+
+            if(activeFragment!=null){
+                activeFragment.setUniqueKey(un);
+            }
+
+
         }
 
     }
@@ -200,6 +224,44 @@ public class StartupScreen extends FragmentActivity{
         tabView.setVisibility(View.VISIBLE);
 
     }
+
+    @Override
+    protected void onStop() {
+        Log.i(LOG_TAG,"onstop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.i(LOG_TAG,"onpause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i(LOG_TAG,"ondestroy");
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i(LOG_TAG,"onresume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.i(LOG_TAG,"onrestart");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.i(LOG_TAG,"onstart");
+        super.onStart();
+    }
+
+
 }
 
 

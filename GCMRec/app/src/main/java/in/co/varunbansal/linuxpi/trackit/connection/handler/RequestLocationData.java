@@ -24,26 +24,18 @@ import in.co.varunbansal.linuxpi.trackit.helper.Config;
 
 import static in.co.varunbansal.linuxpi.trackit.helper.StaticConstants.*;
 
-public class ShareExternalServer extends AsyncTask implements GoogleApiClient.ConnectionCallbacks
-        , GoogleApiClient.OnConnectionFailedListener {
+public class RequestLocationData extends AsyncTask {
 
-    private String regId;
-    private String locationString;
-    private String uniqueKey;
+    private int uniqueKey;
+    private String serial;
     private Context context;
-    private String lat;
-    private String lon;
-    private GoogleApiClient mGoogleApiClient;
-    private Location mLocationService;
+    private String regId;
 
-    public ShareExternalServer(Context context, String regId, String unKey) {
+    public RequestLocationData(Context context, String serial, String unKey,String regId) {
         this.context = context;
-        this.regId = regId;
-        this.uniqueKey = unKey;
-    }
-
-    public ShareExternalServer(Context context, String regId, int unKey) {
-        this(context,regId,Integer.toString(unKey));
+        this.uniqueKey = Integer.parseInt(unKey);
+        this.serial = serial;
+        this.regId=regId;
     }
 
     @Override
@@ -52,28 +44,20 @@ public class ShareExternalServer extends AsyncTask implements GoogleApiClient.Co
 
         String result = "";
         Map paramsMap = new HashMap();
-        paramsMap.put("regId", regId);
         paramsMap.put("unKey", uniqueKey);
+        paramsMap.put("serial", serial);
+        paramsMap.put("regId", regId);
 
-        if(!uniqueKey.equals(UNACTIVE_USER_UNIQUE_RESERVED_KEY) && !uniqueKey.equals(PASSIVE_USER_UNIQUE_RESERVED_KEY)) {
-            buildGoogleAPIClient();
+        Log.i(LOG_TAG,paramsMap.toString());
 
-            mGoogleApiClient.connect();
-
-            while (!mGoogleApiClient.isConnected()) ;
-
-            Log.i(LOG_TAG, "Location String :: " + locationString);
-            while(locationString==null);
-            paramsMap.put("locString", locationString);
-        }
         try {
             URL serverUrl = null;
             try {
-                serverUrl = new URL(Config.APP_SERVER_URL);
+                serverUrl = new URL(Config.APP_SERVER_URL_LOC);
             } catch (MalformedURLException e) {
                 Log.e("AppUtil", "URL Connection Error: "
-                        + Config.APP_SERVER_URL, e);
-                result = "Invalid URL: " + Config.APP_SERVER_URL;
+                        + Config.APP_SERVER_URL_LOC, e);
+                result = "Invalid URL: " + Config.APP_SERVER_URL_LOC;
             }
 
             StringBuilder postBody = new StringBuilder();
@@ -106,8 +90,7 @@ public class ShareExternalServer extends AsyncTask implements GoogleApiClient.Co
 
                 int status = httpCon.getResponseCode();
                 if (status == 200) {
-                    result = "RegId shared with Application Server. RegId: "
-                            + regId;
+                    result = "Request sent to server for location data";
                 } else {
                     result = "Post Failure." + " Status: " + status;
                 }
@@ -131,39 +114,4 @@ public class ShareExternalServer extends AsyncTask implements GoogleApiClient.Co
     }
 
 
-    public synchronized void buildGoogleAPIClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-
-        mLocationService = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-        if (mLocationService != null) {
-            lat = Double.toString(mLocationService.getLatitude());
-            lon = Double.toString(mLocationService.getLongitude());
-        }
-
-        Log.i(LOG_TAG, "Latitude : " + lat);
-        Log.i(LOG_TAG, "Longitude : " + lon);
-
-        locationString = lon+"|"+lat;
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
 }
-

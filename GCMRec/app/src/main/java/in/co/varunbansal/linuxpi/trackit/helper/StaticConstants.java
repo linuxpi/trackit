@@ -8,5 +8,7 @@ public interface StaticConstants {
     final String ACTIVE_USERS_LIST_UPDATE_INTENT_TAG = "Msg";
     final String REG_ID = "registration_id";
     final String UN_KEY =  "unKey";
-    final int PASSIVE_USER_UNIQUE_RESERVED_KEY=100000;
+    final String PASSIVE_USER_UNIQUE_RESERVED_KEY="100000";
+    final String UNACTIVE_USER_UNIQUE_RESERVED_KEY="00000";
+
 }
