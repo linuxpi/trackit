@@ -142,6 +142,9 @@ public class ActiveFragment extends Fragment {
             //enable the NumericPicker
             enableNumbericKey();
 
+            //cancel the notification
+            NotificationManager manager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.cancel(NOTIFICATION_ID);
         }
 
         //send data to app server
