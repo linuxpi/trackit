@@ -8,11 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import java.util.ArrayList;
-
 import in.co.varunbansal.linuxpi.trackit.R;
-
 /**
  * Created by shivam on 4/4/15.
  */
@@ -26,27 +23,23 @@ public class ActiveUserListAdapter extends ArrayAdapter<String> {
         this.list=list;
         this.resource=resource;
     }
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         TextView t=null;
         LinearLayout ll=null;
         if(convertView==null){
             LayoutInflater li= (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView=li.inflate(resource,null);
             t=(TextView)convertView.findViewById(R.id.textview_active_user);
-           ll= (LinearLayout)convertView.findViewById(R.id.location_group);
-
+            ll= (LinearLayout)convertView.findViewById(R.id.location_group);
         }
         else{
             Log.d("Yo","getview");
-             t = (TextView)convertView.findViewById(R.id.textview_active_user);
+            t = (TextView)convertView.findViewById(R.id.textview_active_user);
             ll= (LinearLayout)convertView.findViewById(R.id.location_group);
-            //t.setText(this.list.get(position).split("|")[0]);
-
+//t.setText(this.list.get(position).split("|")[0]);
         }
-        //t = (TextView)convertView.findViewById(R.id.textview_active_user);
+//t = (TextView)convertView.findViewById(R.id.textview_active_user);
         ll.setVisibility(View.GONE);
         String s= this.list.get(position);
         String sp[]=s.split("\\|");

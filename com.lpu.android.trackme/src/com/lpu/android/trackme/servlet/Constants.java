@@ -12,10 +12,10 @@ public class Constants {
 			.getenv("OPENSHIFT_MYSQL_DB_PORT");
 	public static final String MYSQL_DATABASE_NAME = "trackMeUsers";
 
-	public static final String UNACTIVE_USER = "0";
+	public static final String UNACTIVE_USER = "00000";
 	public static final String PASSIVE_USER = "100000";
 	
-	public static final String ACTIVE_USERS_UNKEY_LIST_QUERY = "SELECT unKey,serial_num,location FROM users WHERE unKey <> '000000' AND unKey<>'100000'";
+	public static final String ACTIVE_USERS_UNKEY_LIST_QUERY = "SELECT unKey,serial_num,location FROM users WHERE unKey <> '00000' AND unKey<>'100000'";
 	
 	public static final String PASSIVE_USER_LIST_QUERY = "SELECT regId FROM users WHERE unKey='100000'";
 

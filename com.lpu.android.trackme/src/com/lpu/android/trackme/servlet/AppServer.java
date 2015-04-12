@@ -312,7 +312,8 @@ public class AppServer extends HttpServlet {
 			ArrayList<String> activeUserList = new ArrayList<String>();
 			
 			while(rsActiveUsers.next()){
-				activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(1));
+				activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2));
+				System.out.println("Data :: " + rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2));
 			}
 			
 			if(activeUserList.size()>0){
