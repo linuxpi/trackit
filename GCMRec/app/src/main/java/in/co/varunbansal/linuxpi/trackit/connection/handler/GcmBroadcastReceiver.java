@@ -52,20 +52,24 @@ public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
             } else if (data.charAt(0) == 'g') {
                 Log.i(LOG_TAG, "Received location data");
 //                Toast.makeText(context, "Location data :: " + data, Toast.LENGTH_Short).show();
-                List<Address> add;
+//                List<Address> add;
+//
+//                double lat = getLatFromString(data);
+//                double lon = getLonFromString(data);
+//
+//                Geocoder geocoder = new Geocoder(context);
+//                try {
+//                    add = geocoder.getFromLocation(lat, lon, 1);
+//                    Address locationAdd = add.get(0);
+//                    Toast.makeText(context,"Locality :: "+locationAdd.getAddressLine(0),Toast.LENGTH_LONG).show();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                    i.putExtra("locationData",locationAdd.getAddressLine(0));
+                Intent i = new Intent(ACTIVE_USERS_LIST_UPDATE_INTENT_TAG);
 
-                double lat = getLatFromString(data);
-                double lon = getLonFromString(data);
-
-                Geocoder geocoder = new Geocoder(context);
-                try {
-                    add = geocoder.getFromLocation(lat, lon, 1);
-                    Address locationAdd = add.get(0);
-
-                    Toast.makeText(context,"Locality :: "+locationAdd.getAddressLine(0),Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                i.putExtra("locationData",data);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(i);
 
             }
             setResultCode(Activity.RESULT_OK);
@@ -102,11 +106,5 @@ public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
         return null;
     }
 
-    public double getLatFromString(String data) {
-        return Double.parseDouble(data.substring(data.indexOf('|')+1));
-    }
 
-    public double getLonFromString(String data) {
-        return Double.parseDouble(data.substring(3,data.indexOf('|')-1));
-    }
 }

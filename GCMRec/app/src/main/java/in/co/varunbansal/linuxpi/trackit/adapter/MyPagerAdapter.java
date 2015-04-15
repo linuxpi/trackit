@@ -14,10 +14,12 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
 
     public static Fragment fragment;
     Context context;
+    private String unKey;
 
-    public MyPagerAdapter(FragmentManager fm, Context context) {
+    public MyPagerAdapter(FragmentManager fm, Context context,String unKey) {
         super(fm);
         this.context = context;
+        this.unKey=unKey;
     }
 
     @Override
@@ -25,7 +27,10 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
 
 
         if (position == ACTIVE) {
-            fragment = new ActiveFragment();
+            if(unKey!=null)
+                fragment = new ActiveFragment(unKey);
+            else
+                fragment = new ActiveFragment();
         } else {
             fragment = new PassiveFragment();
             fragment.getId();
