@@ -11,6 +11,13 @@ import android.widget.Toast;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import in.co.varunbansal.linuxpi.trackit.R;
 import in.co.varunbansal.linuxpi.trackit.helper.Config;
@@ -24,8 +31,16 @@ public class NewDeviceRegistration extends AsyncTask {
     private GoogleCloudMessaging gcmInstance;
     private Context context;
     private SharedPreferences shdpref;
+    private String name;
+    private String email;
 
     public NewDeviceRegistration(Context context) {
+        this(context,null,null);
+    }
+
+    public NewDeviceRegistration(Context context,String name,String email){
+        this.name=name;
+        this.email=email;
         this.context = context;
         if (gcmInstance == null)
             gcmInstance = GoogleCloudMessaging.getInstance(context);
@@ -42,11 +57,76 @@ public class NewDeviceRegistration extends AsyncTask {
 
             FirstLaunch.reg_id = reg_id;
 
+            String result = "";
+            Map paramsMap = new HashMap();
+            paramsMap.put("name", name);
+            paramsMap.put("email", email);
+            paramsMap.put("regId", FirstLaunch.reg_id);
+
+            Log.i(LOG_TAG,paramsMap.toString());
+
+            try {
+                URL serverUrl = null;
+                try {
+                    serverUrl = new URL(Config.APP_SERVER_URL_LOC);
+                } catch (MalformedURLException e) {
+                    Log.e("AppUtil", "URL Connection Error: "
+                            + Config.APP_SERVER_URL_LOC, e);
+                    result = "Invalid URL: " + Config.APP_SERVER_URL_LOC;
+                }
+
+                StringBuilder postBody = new StringBuilder();
+                Iterator<Map.Entry<String, String>> iterator = paramsMap.entrySet()
+                        .iterator();
+
+                while (iterator.hasNext()) {
+                    Map.Entry param = iterator.next();
+                    postBody.append(param.getKey()).append('=')
+                            .append(param.getValue());
+                    if (iterator.hasNext()) {
+                        postBody.append('&');
+                    }
+                }
+                String body = postBody.toString();
+                Log.i(LOG_TAG, "Body : " + body);
+                byte[] bytes = body.getBytes();
+                HttpURLConnection httpCon = null;
+                try {
+                    httpCon = (HttpURLConnection) serverUrl.openConnection();
+                    httpCon.setDoOutput(true);
+                    httpCon.setUseCaches(false);
+                    httpCon.setFixedLengthStreamingMode(bytes.length);
+                    httpCon.setRequestMethod("POST");
+                    httpCon.setRequestProperty("Content-Type",
+                            "application/x-www-form-urlencoded;charset=UTF-8");
+                    OutputStream out = httpCon.getOutputStream();
+                    out.write(bytes);
+                    out.close();
+
+                    int status = httpCon.getResponseCode();
+                    if (status == 200) {
+                        result = "Request sent to server for location data";
+                    } else {
+                        result = "Post Failure." + " Status: " + status;
+                    }
+                } finally {
+                    if (httpCon != null) {
+                        httpCon.disconnect();
+                    }
+                }
+
+            } catch (IOException e) {
+                result = "Post Failure. Error in sharing with App Server.";
+                Log.e("AppUtil", "Error in sharing with App Server: " + e);
+            }
+
+
         } catch (IOException e) {
             reg_id = null;
             e.printStackTrace();
             Log.i(LOG_TAG, "Exception in Async Task : \n" + e.getStackTrace());
         }
+
 
         return reg_id;
     }
