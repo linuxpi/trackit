@@ -5,6 +5,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,12 +31,14 @@ public class RequestLocationData extends AsyncTask {
     private String serial;
     private Context context;
     private String regId;
+    private View view;
 
-    public RequestLocationData(Context context, String serial, String unKey,String regId) {
+    public RequestLocationData(Context context, String serial, String unKey,String regId,View v) {
         this.context = context;
         this.uniqueKey = Integer.parseInt(unKey);
         this.serial = serial;
         this.regId=regId;
+        this.view=v;
     }
 
     @Override

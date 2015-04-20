@@ -2,6 +2,7 @@ package in.co.varunbansal.linuxpi.trackit.main;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,12 +12,12 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import in.co.varunbansal.linuxpi.trackit.adapter.MyPagerAdapter;
 import in.co.varunbansal.linuxpi.trackit.adapter.OnPageChangeAdapter;
@@ -52,19 +53,30 @@ public class StartupScreen extends FragmentActivity{
 
             if(activeUsers==null){
                 unKey=intent.getStringExtra(UN_KEY);
-                Log.i(LOG_TAG, "data recieved : " + unKey);
-                if(unKey.charAt(0)=='-'){
-                    passiveFragment.removeActiveUser(unKey.substring(1));
-                }else {
-                    passiveFragment.addNewActiveUser(unKey.substring(1));
+                if(unKey==null){
+                    String location = intent.getStringExtra("locationData");
+                    if(location!=null)
+                        passiveFragment.setLocationString(location);
+                    else
+                        Toast.makeText(getApplicationContext(),"Location not Available!",Toast.LENGTH_SHORT).show();
+
+                }else{
+                    Log.i(LOG_TAG, "data recieved : " + unKey);
+                    if(unKey.charAt(0)=='-'){
+                        passiveFragment.removeActiveUser(unKey.substring(1));
+                    }else {
+                        passiveFragment.addNewActiveUser(unKey.substring(1));
+                    }
                 }
             }else{
                 Log.i(LOG_TAG, "data recieved : " + activeUsers.toString());
+                if(passiveFragment!=null)
                 passiveFragment.updateActiveUsersList(activeUsers);
             }
 
         }
     };
+
     private PassiveFragment passiveFragment;
     private ActiveFragment activeFragment;
 
@@ -78,12 +90,10 @@ public class StartupScreen extends FragmentActivity{
         LocalBroadcastManager.getInstance(this)
                      .registerReceiver(OnActiveUserListUpdateReceived, new IntentFilter(ACTIVE_USERS_LIST_UPDATE_INTENT_TAG));
 
-
-
         activeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setUpInitialLayout(ACTIVE);
+                setUpInitialLayout(ACTIVE,null);
                 //Turn on GPS
 
             }
@@ -92,7 +102,7 @@ public class StartupScreen extends FragmentActivity{
         passiveLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setUpInitialLayout(PASSIVE);
+                setUpInitialLayout(PASSIVE,null);
             }
         });
 
@@ -115,9 +125,6 @@ public class StartupScreen extends FragmentActivity{
                             passiveFragment = (PassiveFragment) getSupportFragmentManager().findFragmentByTag(PassiveFragment.FRAGMENT_TAG);
                             passiveFragment.emptyList();
                         }
-
-
-
 
                         break;
                     case PASSIVE:
@@ -149,8 +156,6 @@ public class StartupScreen extends FragmentActivity{
                 tabView.setCurrentItem(tab.getPosition(), true); //changes the page
                 Log.i(LOG_TAG, "PAGE POSITION : " + tab.getPosition());
                 actionBar.setBackgroundDrawable(cdDarkGreen[tab.getPosition()]);
-//              actionBar.setStackedBackgroundDrawable(cdDarkGreen);
-
             }
         };
 
@@ -168,15 +173,14 @@ public class StartupScreen extends FragmentActivity{
             String un=null;
             un = getIntent().getStringExtra("UniqueKey");
             Log.i(LOG_TAG,un);
-            setUpInitialLayout(ACTIVE);
+            setUpInitialLayout(ACTIVE,un);
             tabView.setCurrentItem(ACTIVE);
             if(activeFragment==null)
                 activeFragment=(ActiveFragment) adapter.getItem(0);
 
             if(activeFragment!=null){
-                activeFragment.setUniqueKey(un);
+//                activeFragment.setUniqueKey(un);
             }
-
 
         }
 
@@ -197,7 +201,7 @@ public class StartupScreen extends FragmentActivity{
         tabView.setVisibility(View.GONE);
     }
 
-    private void setUpInitialLayout(int mode) {
+    private void setUpInitialLayout(int mode, String unKey) {
         animateTabLayout();
         actionBar.show();
 
@@ -211,7 +215,12 @@ public class StartupScreen extends FragmentActivity{
 
         actionBar.setTitle(getString(R.string.track_me_text));
 
-        adapter = new MyPagerAdapter(getSupportFragmentManager(), getApplicationContext());
+//        if(unKey==null){
+            adapter = new MyPagerAdapter(getSupportFragmentManager(), getApplicationContext(),unKey);
+//        }
+//        else{
+//ada
+//        }
         tabView.setAdapter(adapter);
 
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -260,7 +269,6 @@ public class StartupScreen extends FragmentActivity{
         Log.i(LOG_TAG,"onstart");
         super.onStart();
     }
-
 
 }
 

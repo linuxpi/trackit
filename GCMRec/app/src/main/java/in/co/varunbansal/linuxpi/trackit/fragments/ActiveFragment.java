@@ -1,14 +1,9 @@
 package in.co.varunbansal.linuxpi.trackit.fragments;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaMetadata;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -19,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.Toast;
 
 import in.co.varunbansal.linuxpi.trackit.R;
 import in.co.varunbansal.linuxpi.trackit.connection.handler.ShareExternalServer;
@@ -30,14 +26,19 @@ import static in.co.varunbansal.linuxpi.trackit.helper.StaticConstants.*;
 public class ActiveFragment extends Fragment {
 
     public static String FRAGMENT_TAG;
+    private String unKey=null;
     NumberPicker[] key;
     Button bc;
     ShareExternalServer shareTask;
-    private String uniqueKey;
     public final int NOTIFICATION_ID = 1;
+    private static String UNKEY="00000";
 
     public ActiveFragment() {
 
+    }
+
+    public ActiveFragment(String unKey) {
+        this.unKey = unKey;
     }
 
     @Override
@@ -57,9 +58,21 @@ public class ActiveFragment extends Fragment {
             s.setMinValue(0);
         }
 
+
         FRAGMENT_TAG = getTag();
 
         bc = (Button) myView.findViewById(R.id.active_broadcast);
+
+        if(unKey!=null){
+            for(int i=0;i<5;i++){
+                key[i].setValue(Integer.parseInt(unKey.substring(i,i+1)));
+            }
+
+            disableNumbericKey();
+
+            bc.setText(getActivity().getResources().getString(R.string.unbroadcast_button_text));
+        }
+
 
         bc.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,56 +97,18 @@ public class ActiveFragment extends Fragment {
                 temp.append(Integer.toString(s.getValue()));
             }
 
+            if (temp.toString().equals("00000")){
+
+                Toast.makeText(getActivity(),"Unique key cannot be 00000",Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             //disable the NumericPicker
             disableNumbericKey();
 
-
-            //We get a reference to the NotificationManager
-            NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-
-            String MyText = "Broadcast";
-
-            //The three parameters are: 1. an icon, 2. a title, 3. time when the notification appears
-
-            String MyNotificationTitle = "Track It";
-            String MyNotificationText  = "You are successfully broadcasted.\nClick here to un-broadcast yourself.";
-
-            //for showing the ActiveFragment
-            Intent MyIntent = new Intent(getActivity(), StartupScreen.class);
-            MyIntent.putExtra("NotificationMode",true);
-            MyIntent.putExtra("UniqueKey", temp.toString());
-
-            //for action button in notification, it calls a Broadcast Receiver-|
-            Intent buttonIntent = new Intent(getActivity(), ButtonReceiver.class);
-            buttonIntent.putExtra("notificationId",NOTIFICATION_ID);
-
-            //for showing the ActiveFragment
-            PendingIntent StartIntent = PendingIntent.getActivity(getActivity(),0,MyIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-            //for action button in notification
-            PendingIntent buttonPendingIntent = PendingIntent.getBroadcast(getActivity(), 0, buttonIntent,0);
-
-            //issuing the notification
-            NotificationCompat.Builder mb = new NotificationCompat.Builder(getActivity().getBaseContext());
-            mb.setSmallIcon(R.drawable.logo_notify);
-            mb.setContentTitle(MyNotificationTitle);
-            mb.setContentText(MyNotificationText);
-            mb.setPriority(NotificationCompat.PRIORITY_HIGH);
-            mb.setOngoing(true);
-            mb.setStyle(new NotificationCompat.BigTextStyle().bigText(MyNotificationText));
-            mb.setContentIntent(StartIntent);
-            mb.addAction(R.drawable.logo_notify, "Unbroadcast",buttonPendingIntent );
-
-            //starting the notification via notification manager
-            notificationManager.notify(NOTIFICATION_ID , mb.build());
-            //We are passing the notification to the NotificationManager with a unique id.
-
-
-
+            createActiveNotification(temp);
 
             Log.i(LOG_TAG, "unique key of the user is : " + temp);
-
-//                getLocationData();
 
         } else {
             bc.setText(getResources().getString(R.string.broadcast_button_text));
@@ -142,11 +117,55 @@ public class ActiveFragment extends Fragment {
             //enable the NumericPicker
             enableNumbericKey();
 
+            //remove notification
+            NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(NOTIFICATION_ID);
         }
-
+        UNKEY=temp.toString();
         //send data to app server
         shareTask = new ShareExternalServer(getActivity(), FirstLaunch.reg_id, temp.toString());
         shareTask.execute(null, null, null);
+    }
+
+    private void createActiveNotification(StringBuilder temp) {
+        //We get a reference to the NotificationManager
+        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        //The three parameters are: 1. an icon, 2. a title, 3. time when the notification appears
+
+        String MyNotificationTitle = "Track It";
+        String MyNotificationText  = "Broadcasting at "+temp.toString();
+
+        //for showing the ActiveFragment
+        Intent MyIntent = new Intent(getActivity(), StartupScreen.class);
+        MyIntent.putExtra("NotificationMode",true);
+        MyIntent.putExtra("UniqueKey", temp.toString());
+//            MyIntent.putExtra("context",getActivity());
+
+        //for action button in notification, it calls a Broadcast Receiver-|
+        Intent buttonIntent = new Intent(getActivity(), ButtonReceiver.class);
+        buttonIntent.putExtra("notificationId",NOTIFICATION_ID);
+
+        //for showing the ActiveFragment
+        PendingIntent StartIntent = PendingIntent.getActivity(getActivity(),0,MyIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        //for action button in notification
+        PendingIntent buttonPendingIntent = PendingIntent.getBroadcast(getActivity(), 0, buttonIntent,0);
+
+        //issuing the notification
+        NotificationCompat.Builder mb = new NotificationCompat.Builder(getActivity().getBaseContext());
+        mb.setSmallIcon(R.drawable.logo_notify);
+        mb.setContentTitle(MyNotificationTitle);
+        mb.setContentText(MyNotificationText);
+        mb.setPriority(NotificationCompat.PRIORITY_HIGH);
+        mb.setOngoing(true);
+        mb.setStyle(new NotificationCompat.BigTextStyle().bigText(MyNotificationText));
+        mb.setContentIntent(StartIntent);
+        mb.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop Broadcast",buttonPendingIntent );
+
+        //starting the notification via notification manager
+        notificationManager.notify(NOTIFICATION_ID , mb.build());
+        //We are passing the notification to the NotificationManager with a unique id.
     }
 
     public void enableNumbericKey() {

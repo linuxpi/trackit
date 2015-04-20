@@ -26,6 +26,8 @@ public class AppServer extends HttpServlet {
 	String unKey = null;;
 	String locString = null;
 	String serial = null;
+	String name = null;
+	String email = null;
 	
 	Connection conn = null;
 	Statement st = null;
@@ -50,6 +52,10 @@ public class AppServer extends HttpServlet {
 		 unKey = request.getParameter("unKey");
 		 locString = request.getParameter("locString");
 		 serial = request.getParameter("serial");
+		 
+		 name = request.getParameter("name");
+		 email = request.getParameter("email");
+		 
 		 
 		 System.out.println("Unique key :: " + unKey);
 		
@@ -103,12 +109,33 @@ public class AppServer extends HttpServlet {
 			String loc = getLocationFromSerial(serial);
 			
 			//send location data to user
-			sendLocationToSingleUser(regId,loc);
+			System.out.println("sending location -> UNKEY :: "+unKey);
+			sendLocationToSingleUser(regId,loc,unKey);
+		}else if((name != null && !name.isEmpty()) && (email != null && !email.isEmpty()) && (regId != null && !regId.isEmpty())){
+			System.out.println("New user trying to get in.");
+			registerNewUser(name,email,regId);
 		}
 		
 	}
 
-	private void sendLocationToSingleUser(String regId2, String loc) {
+	private void registerNewUser(String name2, String email2, String regId2) {
+		// TODO Auto-generated method stub
+		String query = "INSERT INTO users (name,email,regId,unKey,location) VALUES ('"+name2+"','"+email2+"','"+regId2+"','00000',null);";
+		int result=0;
+		try {
+			result=st.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("Result from database :: "+result);
+		
+		
+	
+	}
+
+	private void sendLocationToSingleUser(String regId2, String loc,String unKey2) {
 		// TODO Auto-generated method stub
 		
 		Result result = null;
@@ -116,7 +143,7 @@ public class AppServer extends HttpServlet {
 		Sender sender = new Sender(GOOGLE_SERVER_KEY);
 		Message message=null;
 		message = new Message.Builder().timeToLive(30)
-				.delayWhileIdle(true).addData(MESSAGE_KEY, "geo"+loc)
+				.delayWhileIdle(true).addData(MESSAGE_KEY, "geo"+loc+"?"+unKey2)
 				.build();
 		System.out.println(message.toString());
 		
@@ -312,7 +339,8 @@ public class AppServer extends HttpServlet {
 			ArrayList<String> activeUserList = new ArrayList<String>();
 			
 			while(rsActiveUsers.next()){
-				activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(1));
+				activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2));
+				System.out.println("Data :: " + rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2));
 			}
 			
 			if(activeUserList.size()>0){

@@ -26,7 +26,7 @@
         </activity>
         <activity
             android:name=".main.FirstLaunch"
-            android:label="Mode Select"
+            android:label="Track It"
             android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" >
             <intent-filter>
@@ -41,6 +41,11 @@
             <meta-data
                 android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="geo" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity
             android:name="in.co.javapapers.sample.MainActivity"
