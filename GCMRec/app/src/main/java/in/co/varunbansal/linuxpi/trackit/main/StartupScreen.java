@@ -45,6 +45,7 @@ public class StartupScreen extends FragmentActivity{
     private MyPagerAdapter adapter;
     private ShareExternalServer passiveModeTransitionThread;
     private ColorDrawable cdDarkGreen[];
+    private AlertDialog  ad;
 
     private BroadcastReceiver OnActiveUserListUpdateReceived = new BroadcastReceiver() {
         @Override
@@ -88,7 +89,18 @@ public class StartupScreen extends FragmentActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mode_choose_acitivity);
-
+        AlertDialog.Builder ab= new AlertDialog.Builder(this);
+        ab.setTitle(getApplicationContext().getResources().getString(R.string.no_connection_title));
+        ab.setMessage(getApplication().getResources().getString(R.string.no_connection_content));
+        ab.setCancelable(false);
+        ab.setNeutralButton("Go to Settings",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent i = new Intent(Settings.ACTION_SETTINGS);
+                startActivity(i);
+            }
+        });
+        ad=ab.create();
         variableInitialization();
 
         LocalBroadcastManager.getInstance(this)
@@ -259,23 +271,11 @@ public class StartupScreen extends FragmentActivity{
 
     @Override
     protected void onResume() {
-        Log.i(LOG_TAG,"onresume");
+       ad.cancel();
         super.onResume();
         ConnectionManager connectionManager= new ConnectionManager(context);
         if(!connectionManager.isConnectionAvailable()){
-            AlertDialog.Builder  ad= new AlertDialog.Builder(this);
-            ad.setTitle(getApplicationContext().getResources().getString(R.string.no_connection_title));
-            ad.setMessage(getApplication().getResources().getString(R.string.no_connection_content));
-            ad.setCancelable(false);
-            ad.setNeutralButton("Go to Settings",new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent i = new Intent(Settings.ACTION_SETTINGS);
-                    startActivity(i);
-                }
-            });
             ad.show();
-
         }
     }
 
