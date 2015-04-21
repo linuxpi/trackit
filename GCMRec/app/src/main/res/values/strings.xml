@@ -13,5 +13,7 @@
         <item name="active">Active</item>
         <item name="active">Passive</item>
     </array>
+    <string name="no_connection_content">To broadcast yourself or to see other user in passive mode you need an active internet connection.Please switch on Wifi or Mobile data</string>
+    <string name="no_connection_title">No Internet Connection!</string>
 
 </resources>

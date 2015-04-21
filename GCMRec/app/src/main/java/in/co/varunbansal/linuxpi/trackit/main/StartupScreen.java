@@ -1,14 +1,17 @@
 package in.co.varunbansal.linuxpi.trackit.main;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
@@ -26,6 +29,7 @@ import in.co.varunbansal.linuxpi.trackit.fragments.PassiveFragment;
 import in.co.varunbansal.linuxpi.trackit.R;
 import in.co.varunbansal.linuxpi.trackit.connection.handler.ShareExternalServer;
 import in.co.varunbansal.linuxpi.trackit.adapter.TabAdapter;
+import in.co.varunbansal.linuxpi.trackit.helper.ConnectionManager;
 
 import static in.co.varunbansal.linuxpi.trackit.helper.StaticConstants.*;
 
@@ -41,6 +45,7 @@ public class StartupScreen extends FragmentActivity{
     private MyPagerAdapter adapter;
     private ShareExternalServer passiveModeTransitionThread;
     private ColorDrawable cdDarkGreen[];
+    private AlertDialog  ad;
 
     private BroadcastReceiver OnActiveUserListUpdateReceived = new BroadcastReceiver() {
         @Override
@@ -84,16 +89,28 @@ public class StartupScreen extends FragmentActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mode_choose_acitivity);
-
+        AlertDialog.Builder ab= new AlertDialog.Builder(this);
+        ab.setTitle(getApplicationContext().getResources().getString(R.string.no_connection_title));
+        ab.setMessage(getApplication().getResources().getString(R.string.no_connection_content));
+        ab.setCancelable(false);
+        ab.setNeutralButton("Go to Settings",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent i = new Intent(Settings.ACTION_SETTINGS);
+                startActivity(i);
+            }
+        });
+        ad=ab.create();
         variableInitialization();
 
         LocalBroadcastManager.getInstance(this)
                      .registerReceiver(OnActiveUserListUpdateReceived, new IntentFilter(ACTIVE_USERS_LIST_UPDATE_INTENT_TAG));
 
+
         activeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setUpInitialLayout(ACTIVE,null);
+                setUpInitialLayout(ACTIVE, null);
                 //Turn on GPS
 
             }
@@ -254,8 +271,12 @@ public class StartupScreen extends FragmentActivity{
 
     @Override
     protected void onResume() {
-        Log.i(LOG_TAG,"onresume");
+       ad.cancel();
         super.onResume();
+        ConnectionManager connectionManager= new ConnectionManager(context);
+        if(!connectionManager.isConnectionAvailable()){
+            ad.show();
+        }
     }
 
     @Override
