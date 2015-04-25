@@ -103,9 +103,9 @@ public class ActiveFragment extends Fragment {
              final LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
 
-            for (NumberPicker s : key) {
-                temp.append(Integer.toString(s.getValue()));
-            }
+//            for (NumberPicker s : key) {
+//                temp.append(Integer.toString(s.getValue()));
+//            }
 
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
