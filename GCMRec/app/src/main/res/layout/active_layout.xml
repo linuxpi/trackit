@@ -5,7 +5,7 @@
 
     <LinearLayout
         android:id="@+id/spinner_grp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -13,30 +13,34 @@
 
         <NumberPicker
             android:id="@+id/un1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"></NumberPicker>
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"/>
 
         <NumberPicker
             android:id="@+id/un2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"></NumberPicker>
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"/>
 
         <NumberPicker
             android:id="@+id/un3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"></NumberPicker>
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"/>
 
         <NumberPicker
             android:id="@+id/un4"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"></NumberPicker>
+            android:baselineAligned="false"/>
 
         <NumberPicker
-
             android:id="@+id/un5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"></NumberPicker>
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <Button
@@ -45,22 +49,22 @@
         android:id="@+id/active_broadcast"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/broadcast_button_text"
-        android:layout_above="@+id/confirmMessage"
+        android:layout_below="@+id/spinner_grp"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="65dp" />
+        android:layout_marginTop="50dp"
+        android:text="@string/broadcast_button_text" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="200px"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Congrats! You have successfully broadcasted yourself."
-        android:id="@+id/confirmMessage"
-        android:gravity="center"
-        android:textColor="#f00"
-        android:textAlignment="center"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+    android:layout_width="wrap_content"
+    android:layout_height="200px"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:text="Congrats! You have successfully broadcasted yourself."
+    android:id="@+id/confirmMessage"
+    android:gravity="center"
+    android:textColor="#f00"
+    android:textAlignment="center"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true" />
 
 </RelativeLayout>

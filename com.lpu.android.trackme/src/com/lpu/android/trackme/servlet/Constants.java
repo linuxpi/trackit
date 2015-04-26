@@ -15,7 +15,7 @@ public class Constants {
 	public static final String UNACTIVE_USER = "00000";
 	public static final String PASSIVE_USER = "100000";
 	
-	public static final String ACTIVE_USERS_UNKEY_LIST_QUERY = "SELECT unKey,serial_num,location FROM users WHERE unKey <> '00000' AND unKey<>'100000'";
+	public static final String ACTIVE_USERS_UNKEY_LIST_QUERY = "SELECT unKey,serial_num,time FROM users WHERE unKey <> '00000' AND unKey<>'100000'";
 	
 	public static final String PASSIVE_USER_LIST_QUERY = "SELECT regId FROM users WHERE unKey='100000'";
 

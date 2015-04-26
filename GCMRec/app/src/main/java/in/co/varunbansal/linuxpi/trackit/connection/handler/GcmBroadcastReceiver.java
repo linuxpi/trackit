@@ -49,23 +49,8 @@ public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
                     i.putExtra("unKey", unKey);
                 }
                 LocalBroadcastManager.getInstance(context).sendBroadcast(i);
-            } else if (data.charAt(0) == 'g') {
+            } else if (data.charAt(0) == 'g' && data.charAt(3)!='n') {
                 Log.i(LOG_TAG, "Received location data");
-//                Toast.makeText(context, "Location data :: " + data, Toast.LENGTH_Short).show();
-//                List<Address> add;
-//
-//                double lat = getLatFromString(data);
-//                double lon = getLonFromString(data);
-//
-//                Geocoder geocoder = new Geocoder(context);
-//                try {
-//                    add = geocoder.getFromLocation(lat, lon, 1);
-//                    Address locationAdd = add.get(0);
-//                    Toast.makeText(context,"Locality :: "+locationAdd.getAddressLine(0),Toast.LENGTH_LONG).show();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                    i.putExtra("locationData",locationAdd.getAddressLine(0));
                 Intent i = new Intent(ACTIVE_USERS_LIST_UPDATE_INTENT_TAG);
 
                 i.putExtra("locationData",data);
