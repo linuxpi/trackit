@@ -15,6 +15,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,11 +52,15 @@ public class ShareExternalServer extends AsyncTask implements GoogleApiClient.Co
     @Override
     protected Object doInBackground(Object[] params) {
 
+        DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date d = new Date();
+        d.getTime();
 
         String result = "";
         Map paramsMap = new HashMap();
         paramsMap.put("regId", regId);
         paramsMap.put("unKey", uniqueKey);
+        paramsMap.put("time",format.format(d));
 
         if(!uniqueKey.equals(UNACTIVE_USER_UNIQUE_RESERVED_KEY) && !uniqueKey.equals(PASSIVE_USER_UNIQUE_RESERVED_KEY)) {
             buildGoogleAPIClient();

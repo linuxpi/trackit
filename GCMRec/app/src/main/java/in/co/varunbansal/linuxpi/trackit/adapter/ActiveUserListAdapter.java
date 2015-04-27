@@ -26,16 +26,19 @@ public class ActiveUserListAdapter extends ArrayAdapter<String> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         TextView t=null;
+        TextView time=null;
         LinearLayout ll=null;
         if(convertView==null){
             LayoutInflater li= (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView=li.inflate(resource,null);
             t=(TextView)convertView.findViewById(R.id.textview_active_user);
+            time=(TextView)convertView.findViewById(R.id.textview_active_user_time);
             ll= (LinearLayout)convertView.findViewById(R.id.location_group);
         }
         else{
             Log.d("Yo","getview");
             t = (TextView)convertView.findViewById(R.id.textview_active_user);
+            time = (TextView)convertView.findViewById(R.id.textview_active_user_time);
             ll= (LinearLayout)convertView.findViewById(R.id.location_group);
 //t.setText(this.list.get(position).split("|")[0]);
         }
@@ -44,6 +47,7 @@ public class ActiveUserListAdapter extends ArrayAdapter<String> {
         String s= this.list.get(position);
         String sp[]=s.split("\\|");
         t.setText(sp[0]);
+        time.setText(sp[2]+" minutes ago");
         return convertView;
     }
 }

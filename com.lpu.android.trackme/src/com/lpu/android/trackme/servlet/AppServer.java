@@ -9,6 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.sql.*;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import com.google.android.gcm.server.Message;
@@ -28,6 +32,7 @@ public class AppServer extends HttpServlet {
 	String serial = null;
 	String name = null;
 	String email = null;
+	String timeString=null;
 	
 	Connection conn = null;
 	Statement st = null;
@@ -52,7 +57,7 @@ public class AppServer extends HttpServlet {
 		 unKey = request.getParameter("unKey");
 		 locString = request.getParameter("locString");
 		 serial = request.getParameter("serial");
-		 
+		 timeString = request.getParameter("time");
 		 name = request.getParameter("name");
 		 email = request.getParameter("email");
 		 
@@ -87,7 +92,7 @@ public class AppServer extends HttpServlet {
 						//get the previous unKey using serial
 						preUnKey = getPrevUnKeyFromSerial(newSerial);
 						
-						updateUnKeyWithLocation(newSerial, unKey, locString);
+						updateUnKeyWithLocation(newSerial, unKey, locString,"null");
 					}else{
 						newSerial = addNewUserToDatabase(regId,unKey);
 					}
@@ -225,7 +230,7 @@ public class AppServer extends HttpServlet {
 					//just update the parameter in DB 
 					//nothing else required
 
-					boolean result = updateUnKeyWithLocation(serial, unKey,locString);
+					boolean result = updateUnKeyWithLocation(serial, unKey,locString,"null");
 					if (result) {
 						//success
 					} else {
@@ -242,7 +247,7 @@ public class AppServer extends HttpServlet {
 					System.out.println("Sending remove request to all passive users");
 					sendRemoveRequestToAllPassive(serial, preUnKey);
 					
-					updateUnKeyWithLocation(serial, unKey,locString);
+					updateUnKeyWithLocation(serial,unKey,locString,"null");
 
 				}
 			}
@@ -263,22 +268,22 @@ public class AppServer extends HttpServlet {
 			//no need to check previous unkey
 			//update the database and notify passive users
 
-			updateUnKeyWithLocation(serial, unKey,locString);
+			updateUnKeyWithLocation(serial, unKey,locString,timeString);
 
 			System.out.println("serail :: " + serial + "unKey ::" +unKey);
-			sendAddRequestToAllPassive(serial,unKey);
+			sendAddRequestToAllPassive(serial,unKey,timeString);
 
 		}
 	}
 
-	private void sendAddRequestToAllPassive(String serial2,String unKey2) {
+	private void sendAddRequestToAllPassive(String serial2,String unKey2,String time) {
 		// TODO Auto-generated method stub
 		try {
 			ResultSet rsPassiveUsers = st
 					.executeQuery(PASSIVE_USER_LIST_QUERY);
 			System.out
 			.println("add unique key req to send to all passive users is : "
-					+ unKey);
+					+ unKey + ",time="+time);
 
 			String regID;		
 			Result result = null;
@@ -286,10 +291,10 @@ public class AppServer extends HttpServlet {
 			Sender sender = new Sender(GOOGLE_SERVER_KEY);
 			Message message=null;
 			message = new Message.Builder().timeToLive(30)
-					.delayWhileIdle(true).addData(MESSAGE_KEY, "+"+unKey2+"|"+serial2)
+					.delayWhileIdle(true).addData(MESSAGE_KEY, "+"+unKey2+"|"+serial2+"|"+time)
 					.build();
 			
-			System.out.println("Sending data >>>>> :: +" +unKey2+"|"+serial2);
+			System.out.println("Sending data >>>>> :: +" +unKey2+"|"+serial2+"|"+time);
 			
 			while (rsPassiveUsers.next()) {
 				regID = rsPassiveUsers.getString(1);
@@ -332,15 +337,30 @@ public class AppServer extends HttpServlet {
 
 	private void sendActiveListToPassive(String passRegID) {
 		// TODO Auto-generated method stub
-		
+		DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"); 
 		ResultSet rsActiveUsers;
 		try {
 			rsActiveUsers = st.executeQuery(ACTIVE_USERS_UNKEY_LIST_QUERY);
 			ArrayList<String> activeUserList = new ArrayList<String>();
-			
-			while(rsActiveUsers.next()){
-				activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2));
-				System.out.println("Data :: " + rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2));
+			String timeAgo;
+			int dayDiff;
+			java.util.Date nowDate = new java.util.Date();
+			try{
+				while(rsActiveUsers.next()){
+					Date broadcastDate = (Date) dateFormatter.parse(rsActiveUsers.getString(3));
+					dayDiff = nowDate.getDate() - broadcastDate.getDate();
+					System.out.println("Day Diff :: " + dayDiff);
+					if(dayDiff==0){
+						timeAgo = Long.toString((nowDate.getTime()-broadcastDate.getTime())/60/1000) + dayDiff*24*60;
+					
+						activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2)+"|"+timeAgo);
+						System.out.println("Data :: " + rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2)+"|"+timeAgo);
+					}else{
+						//notify server to discard the unique key
+					}
+				}
+			}catch(ParseException pe){
+				pe.printStackTrace();
 			}
 			
 			if(activeUserList.size()>0){
@@ -435,9 +455,16 @@ public class AppServer extends HttpServlet {
 		
 	}
 
-	private boolean updateUnKeyWithLocation(String serial2, String unKey2,String locString2) {
+	private boolean updateUnKeyWithLocation(String serial2, String unKey2,String locString2,String time) {
 		// TODO Auto-generated method stub
-		String query = "UPDATE users SET unKey='"+unKey2+"',location='"+locString2+"' WHERE serial_num="+serial2+";";
+		String query;
+		
+		if(time.equals("null")){
+			query = "UPDATE users SET unKey='"+unKey2+"',location='"+locString2+"' WHERE serial_num="+serial2+";";
+		}else{
+			query = "UPDATE users SET unKey='"+unKey2+"',location='"+locString2+"' , time='"+time+"' WHERE serial_num="+serial2+";";
+		}
+		
 		int result = 0;
 		try {
 			result = st.executeUpdate(query);
