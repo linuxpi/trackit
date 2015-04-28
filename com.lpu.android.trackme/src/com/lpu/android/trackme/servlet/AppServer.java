@@ -9,7 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.sql.*;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -270,7 +272,7 @@ public class AppServer extends HttpServlet {
 
 			updateUnKeyWithLocation(serial, unKey,locString,timeString);
 
-			System.out.println("serail :: " + serial + "unKey ::" +unKey);
+			System.out.println("serail :: " + serial + "unKey ::" +unKey + "Time :: " + timeString);
 			sendAddRequestToAllPassive(serial,unKey,timeString);
 
 		}
@@ -291,10 +293,10 @@ public class AppServer extends HttpServlet {
 			Sender sender = new Sender(GOOGLE_SERVER_KEY);
 			Message message=null;
 			message = new Message.Builder().timeToLive(30)
-					.delayWhileIdle(true).addData(MESSAGE_KEY, "+"+unKey2+"|"+serial2+"|"+time)
+					.delayWhileIdle(true).addData(MESSAGE_KEY, "+"+unKey2+"|"+serial2+"|1")
 					.build();
 			
-			System.out.println("Sending data >>>>> :: +" +unKey2+"|"+serial2+"|"+time);
+			System.out.println("Sending data >>>>> :: +" +unKey2+"|"+serial2+"|1");
 			
 			while (rsPassiveUsers.next()) {
 				regID = rsPassiveUsers.getString(1);
@@ -334,33 +336,50 @@ public class AppServer extends HttpServlet {
 		}
 		return false;
 	}
+	
+	private String timeDifferenceInMinutes(String timeDate){
+		String timeAgo;
+		int dayDiff;
+		java.util.Date nowDate = new java.util.Date();
+		DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"); 
+		dateFormatter.setTimeZone(TimeZone.getTimeZone("IST"));
+		
+		Date broadcastDate = null;
+		try {
+			broadcastDate = (Date) dateFormatter.parse(timeDate);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		dayDiff = nowDate.getDate() - broadcastDate.getDate();
+		System.out.println("Day Diff :: " + dayDiff);
+		if(dayDiff==0){
+			System.out.println("Now Date : " + nowDate);
+			System.out.println("Broadcast Date" + broadcastDate);
+			System.out.println(" " + Long.toString(nowDate.getTime()-broadcastDate.getTime()));
+			timeAgo = Long.toString((nowDate.getTime()-broadcastDate.getTime())/60/1000);
+			return timeAgo;
+		}else{
+			return null;
+		}
+	}
 
 	private void sendActiveListToPassive(String passRegID) {
 		// TODO Auto-generated method stub
-		DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"); 
+		
 		ResultSet rsActiveUsers;
 		try {
 			rsActiveUsers = st.executeQuery(ACTIVE_USERS_UNKEY_LIST_QUERY);
 			ArrayList<String> activeUserList = new ArrayList<String>();
-			String timeAgo;
-			int dayDiff;
-			java.util.Date nowDate = new java.util.Date();
-			try{
-				while(rsActiveUsers.next()){
-					Date broadcastDate = (Date) dateFormatter.parse(rsActiveUsers.getString(3));
-					dayDiff = nowDate.getDate() - broadcastDate.getDate();
-					System.out.println("Day Diff :: " + dayDiff);
-					if(dayDiff==0){
-						timeAgo = Long.toString((nowDate.getTime()-broadcastDate.getTime())/60/1000) + dayDiff*24*60;
-					
-						activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2)+"|"+timeAgo);
-						System.out.println("Data :: " + rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2)+"|"+timeAgo);
-					}else{
-						//notify server to discard the unique key
-					}
+			String timeAgo1;
+			while(rsActiveUsers.next()){
+				timeAgo1 = timeDifferenceInMinutes(rsActiveUsers.getString(3));
+				if(timeAgo1!=null){
+					activeUserList.add(rsActiveUsers.getString(1)+"|"+rsActiveUsers.getInt(2)+"|"+timeAgo1);
+					System.out.println("Data :: " + rsActiveUsers.getString(1)+"|"+timeAgo1);
+				}else{
+					//notify server to discard the unique key
 				}
-			}catch(ParseException pe){
-				pe.printStackTrace();
 			}
 			
 			if(activeUserList.size()>0){
