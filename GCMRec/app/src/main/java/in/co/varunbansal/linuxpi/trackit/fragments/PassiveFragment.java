@@ -158,10 +158,25 @@ public class PassiveFragment extends Fragment {
 
     public void removeActiveUser(String unKey) {
         Log.i(LOG_TAG, "removing entry :: " + unKey);
-        if(activeUsers.contains(unKey)) {
-            activeUsers.remove(activeUsers.indexOf(unKey));
-            adapter.notifyDataSetChanged();
+//        if(activeUsers.contains(unKey)) {
+//            activeUsers.remove(activeUsers.indexOf(unKey));
+//            adapter.notifyDataSetChanged();
+//        }
+            String r[] = unKey.split("\\|");
+            Log.i(LOG_TAG,r[0]);
+          int count = activeUsers.size();
+        for(int i=0;i<count;i++){
+            String data = activeUsers.get(i);
+            String sp[]=data.split("\\|");
+            Log.i(LOG_TAG,data);
+            if(r[0].equals(sp[0]) && r[1].equals(sp[1])){
+                activeUsers.remove(i);
+                adapter.notifyDataSetChanged();
+                break;
+            }
         }
+
+
     }
 
     public void setLocationString(String locationString) {
